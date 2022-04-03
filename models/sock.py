@@ -1,7 +1,7 @@
 import socket, ssl
 
 
-context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 context.verify_mode = ssl.CERT_REQUIRED
 context.check_hostname = True
 context.load_default_certs()

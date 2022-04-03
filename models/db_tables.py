@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, registry, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy import inspect
-from .db66 import ChemicalDB
+
 
 Base = declarative_base()
 
@@ -54,8 +54,8 @@ class KeyPair(Base):
 
 
 # cryptocurrency exchanges
-class Exchange(Base):
-    __tablename__ = 'exchange'
+class CryptoExchange(Base):
+    __tablename__ = 'crypto_exchange'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
     url = Column(String, nullable=False, unique=True)
@@ -74,35 +74,29 @@ class Cryptocurrency(Base):
 
 
 # association table containing cryptocurrency trading pairs quoted in other cryptocurrencies
-class CryptoTicker(Base):
-    __tablename__ = 'crypto_pair'
+class Ticker(Base):
+    __tablename__ = 'ticker'
     id = Column(Integer, primary_key=True)
-    base_id = Column(ForeignKey('cryptocurrency.id'), backref='cryptoticker_base')
-    quote_id = Column(ForeignKey('cryptocurrency.id'), backref='cryptoticker_quote')
-    source_id = Column(ForeignKey('exchange.id'), backref='cryptoticker_source')
-
-
-# association table containing cryptocurrency trading pairs quoted in fiat currencies
-class CryptoFiatTicker(Base):
-    __tablename__ = 'crypto_quote'
-    id = Column(Integer, primary_key=True)
-    base_id = Column(ForeignKey('cryptocurrency.id'), backref='cryptofiatticker_base')
-    quote_id = Column(ForeignKey('currency.id'), backref='cryptofiatticker_quote')
-    source_id = Column(ForeignKey('exchange.id'), backref='cryptofiatticker_source')
+    base = Column(String, nullable=False)
+    quote = Column(String, nullable=False)
+    source = Column(String, nullable=True)
+    price = Column(Float, default=0)
 
 
 
+# id = alhpa 2 ISO code
 class Country(Base):
     __tablename__ = 'country'
-    iso_code = Column(String, primary_key=True)
+    id = Column(String, primary_key=True)
     name = Column(String, nullable=False, unique=True)
-    currency_id = Column(Integer, ForeignKey('currency.id'), backref='currency_issuer')
+    currency_id = Column(Integer, ForeignKey('currency.id'))
     currency = relationship('currency', back_populates='currency_countries')
 
 
+# id = alpha 3 ISO code
 class Currency(Base):
     __tablename__ = 'currency'
-    alpha_3 = Column(String, primary_key=True)
+    id = Column(String, primary_key=True)
     name = Column(String, nullable=False, unique=True)
 
 
@@ -114,7 +108,7 @@ class MomentumAlgorithm(Base):
     name = Column(String, default='Momentum algorithm')
     user_id = Column(Integer, ForeignKey('user.id'))
     coin_id = Column(Integer, ForeignKey('cryptocurrency.id'))
-    quote = Column(String, ForeignKey('currency.alpha_3'))
+    quote = Column(String, ForeignKey('currency.id'))
     short_ma = Column(Integer, nullable=False)
     long_ma = Column(Integer, nullable=False)
     long = Column(Boolean, nullable=False)
@@ -164,7 +158,7 @@ class ArbitrageAlgorithm(Base):
     coin_id = Column(Integer, ForeignKey('cryptocurrency.id'))
     quote_currency = Column(Integer, ForeignKey('currency.id'))
     refresh_rate = Column(Integer, nullable=False, default=10)
-    exchanges = relationship('exchange', backref='arbitrage_algorithm', back_populates='exchanges')
+    exchanges = relationship('exchange', back_populates='exchanges')
     long = Column(Boolean)
     short = Column(Boolean)
     entry_threshold = Column(Float)
@@ -173,24 +167,24 @@ class ArbitrageAlgorithm(Base):
     leverage = Column(Integer, default=1)
 
 
-class TwitterAlgorithm(Base):
-    __tablename__ = 'twitter_algorithm'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=False, default='Twitter algorithm')
-    user_id = Column(Integer, ForeignKey('user.id'), p)
-
-
-class Condition(Base):
-    __tablename__ = 'condition'
-    id = Column(Integer, primary_key=True)
-    ticker_id = Column(Integer, ForeignKey('cryptocurrency.id'))
-    exchange_id = Column(Integer, ForeignKey('exchange.id'))
-    operand = Column(String)
-    value = Column(Float)
-
-
-class Alert(Base):
-    __tablename__ = 'alert'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    condition_id = Column(Integer, ForeignKey('condition.id'))
+# class TwitterAlgorithm(Base):
+#     __tablename__ = 'twitter_algorithm'
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     name = Column(String, nullable=False, default='Twitter algorithm')
+#     user_id = Column(Integer, ForeignKey('user.id'), p)
+#
+#
+# class Condition(Base):
+#     __tablename__ = 'condition'
+#     id = Column(Integer, primary_key=True)
+#     ticker_id = Column(Integer, ForeignKey('cryptocurrency.id'))
+#     exchange_id = Column(Integer, ForeignKey('exchange.id'))
+#     operand = Column(String)
+#     value = Column(Float)
+#
+#
+# class Alert(Base):
+#     __tablename__ = 'alert'
+#     id = Column(Integer, primary_key=True)
+#     user_id = Column(Integer, ForeignKey('user.id'))
+#     condition_id = Column(Integer, ForeignKey('condition.id'))
