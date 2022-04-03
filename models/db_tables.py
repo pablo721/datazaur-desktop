@@ -73,6 +73,7 @@ class Cryptocurrency(Base):
     exchanges = relationship('markets', back_populates='cryptocurrency')
 
 
+
 # association table containing cryptocurrency trading pairs quoted in other cryptocurrencies
 class Ticker(Base):
     __tablename__ = 'ticker'
